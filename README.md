@@ -9,15 +9,13 @@
 [x] Funcionalidade 4 \
 [x] Funcionalidade 5 \
 [x] Funcionalidade 6 \
-[] Funcionalidade 7 (DIFICIL)\
- -> [] Inserção \
- -> [] Split \
- -> [] Driver \
-[] Funcionalidade 8 (FACIL)\
- -> [X] procura \
-[] Funcionalidade 9 (+/-)\
- -> [] Inserção \
- -> [] Split \
+[x] Funcionalidade 7 \
+[x] Funcionalidade 8 \
+[x] Funcionalidade 9 \
+[] Funcionalidade 10 \
+[] Funcionalidade 11\
+[] Funcionalidade 12 \
+[] Funcionalidade 13 \
 [] Documentacao do codigo \
 [] Gravacao do video final
 
