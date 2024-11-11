@@ -2,27 +2,50 @@
 #define __GRAPH_ROUTINES__
 
 #include "speciesRoutines.h"
-#include <bits/stdc++.h>
+//#include <bits/stdc++.h>
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
 #include <vector>
 
 //#include "bTreeHeaderRoutines.h"
 //#include "funcoes_fornecidas.h"
-//#include "headerRoutines.h"
-//#include "speciesRoutines.h"
+#include "headerRoutines.h"
 //#include <math.h>
 //#include <stdio.h>
 //#include <stdlib.h>
 //#include <string.h>
 
+// futuro: array_item
+//  vector_item
 typedef struct
 {
-    char species[MAX_FIELD_LEN];
-    char habitat[MAX_FIELD_LEN];
-    char diet[MAX_FIELD_LEN];
-    int entry_degree, exit_degree, degree;
-} GRAPH_NODE;
+    std::string name;
+    std::string food;
+    int population;
+} VECTOR_NODE;
 
-typedef std::vector<std::vector<GRAPH_NODE>> GRAPH;
+typedef struct
+{
+    std::string name;
+    std::string species;
+    std::string habitat;
+    std::string diet;
+    std::string type;
+    int entry_degree, exit_degree, degree;
+} ARRAY_NODE;
+
+// typedef std::pair<std::vector<ARRAY_NODE>, std::vector<std::vector<VECTOR_NODE>>> GRAPH;
+typedef std::vector<std::pair<ARRAY_NODE, std::vector<VECTOR_NODE>>> GRAPH;
+
+// typedef std::vector<std::vector<GRAPH_NODE>> GRAPH;
+
+ARRAY_NODE createArrayNode(Dinosaur temp_dino);
+VECTOR_NODE createVectorNode(Dinosaur temp_dino);
+void addGraph(GRAPH *graph, Dinosaur temp_dino);
+void sortGraph(GRAPH *graph);
+void printNode(GRAPH *temp_graph, int i, int j);
+void printGraph(GRAPH *graph);
 
 // int searchDinoIndexBtree(Dinosaur *Dino, bTree_Header *btree_head, FILE *bTreePointer);
 // int insertDinoIndexBtree(Dinosaur *Dino, FILE *bTreeFilename, bTree_Header *btree_head);

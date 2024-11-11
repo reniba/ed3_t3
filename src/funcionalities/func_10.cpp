@@ -1,4 +1,5 @@
 #include "./../../headers/func_10.h"
+#include <algorithm>
 
 // INSERT funcionality
 int funcionality10(char DinosaurData_filename[])
@@ -24,22 +25,23 @@ int funcionality10(char DinosaurData_filename[])
         msg_default_error();
         return EXIT_FAILURE;
     }
+
     // initialize grapgh
     GRAPH graph;
 
     // input amount of items to insert
-    char input[MAX_VALUE_LEN];
-    scanf("%s", input);
-
-    for (int i = 1; i <= atoi(input); i++)
+    for (int i = 1; i <= head.nextRRN; i++)
+    // for (int i = 1; i <= 1; i++)
     {
         // register input
         Dinosaur temp_dino;
-        readFromInput(&temp_dino);
-
-        // add grapgh
+        ReadFromFile(&temp_dino, data_file);
+        // if (temp_dino.population > -1)
+        addGraph(&graph, temp_dino);
+        //  add grapgh
     }
-
+    sortGraph(&graph);
+    printGraph(&graph);
     fclose(data_file);
 
     // printGrapgh

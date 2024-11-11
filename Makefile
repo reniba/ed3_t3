@@ -14,15 +14,12 @@ ALL_SRC     := $(wildcard $(SRC)/*.c)
 ALL_SRC_2   := $(wildcard $(SRC_2)/*.c)
 ALL_SRC_3   := $(wildcard $(SRC)/*.cpp)
 ALL_SRC_4   := $(wildcard $(SRC_2)/*.cpp)
-ALL         := $(ALL_SRC:$(SRC)/%.c=$(BIN)/%.o) $(ALL_SRC_2:$(SRC_2)/%.c=$(BIN)/%.o) $(ALL_SRC_3:$(SRC)/%.c=$(BIN)/%.o) $(ALL_SRC_4:$(SRC_2)/%.c=$(BIN)/%.o)
-
+ALL         := $(ALL_SRC:$(SRC)/%.c=$(BIN)/%.o) $(ALL_SRC_2:$(SRC_2)/%.c=$(BIN)/%.o) $(ALL_SRC_3:$(SRC)/%.cpp=$(BIN)/%.o) $(ALL_SRC_4:$(SRC_2)/%.cpp=$(BIN)/%.o)
 
 
 all: $(EXEC)
 
-compile: clean all
-
-run: all
+run:
 	./$(EXEC)
 
 clean:
@@ -34,13 +31,20 @@ zip:
 
 
 $(EXEC): $(ALL)
-	$(CC) -o $(EXEC) $(BIN)/*.o $(FLAGS)
+	$(CC) -o $(EXEC) $(ALL) $(FLAGS)
 
 $(BIN)/%.o: $(SRC)/%.c $(BIN)
 	$(CC) -o $@ -c $< -I $(HEADERS) $(FLAGS)
 
 # Rule for files in SRC_2
 $(BIN)/%.o: $(SRC_2)/%.c $(BIN)
+	$(CC) -o $@ -c $< -I $(HEADERS) $(FLAGS)
+
+$(BIN)/%.o: $(SRC)/%.cpp $(BIN)
+	$(CC) -o $@ -c $< -I $(HEADERS) $(FLAGS)
+
+# Rule for files in SRC_2
+$(BIN)/%.o: $(SRC_2)/%.cpp $(BIN)
 	$(CC) -o $@ -c $< -I $(HEADERS) $(FLAGS)
 
 $(BIN):

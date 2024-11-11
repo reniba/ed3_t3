@@ -16,6 +16,8 @@
  */
 
 #include "../headers/func_1.h"
+#include "../headers/func_10.h"
+#include "../headers/func_11.h"
 #include "../headers/func_2.h"
 #include "../headers/func_3.h"
 #include "../headers/func_4.h"
@@ -24,8 +26,6 @@
 #include "../headers/func_7.h"
 #include "../headers/func_8.h"
 #include "../headers/func_9.h"
-//#include "../headers/func_10.h"
-//#include "../headers/func_11.h"
 //#include "../headers/func_12.h"
 //#include "../headers/func_13.h"
 //#include "../headers/func_14.h"
@@ -50,66 +50,66 @@ int main()
         // CREATE TABLE funcionality
         funcionality1(input2, input3);
     }
-    if (!strcmp("2", input1))
+    else if (!strcmp("2", input1))
     {
         // SELECT FROM funcionality
         funcionality2(input2);
     }
-    if (!strcmp("3", input1))
+    else if (!strcmp("3", input1))
     {
         // SELECT WHERE funcionality
         funcionality3(input2, input3);
     }
-    if (!strcmp("4", input1))
+    else if (!strcmp("4", input1))
     {
         // REMOVE funcionality
         funcionality4(input2, input3);
     }
-    if (!strcmp("5", input1))
+    else if (!strcmp("5", input1))
     {
         // INSERT INTO funcionality
         funcionality5(input2, input3);
     }
-    if (!strcmp("6", input1))
+    else if (!strcmp("6", input1))
     {
         // COMPACT funcionality
         funcionality6(input2);
     }
-    if (!strcmp("7", input1))
+    else if (!strcmp("7", input1))
     {
         // CREATE_INDEX funcionality
         funcionality7(input2, input3);
     }
-    if (!strcmp("8", input1))
+    else if (!strcmp("8", input1))
     {
         // SELECT funcionality
         funcionality8(input2, input3);
     }
-    if (!strcmp("9", input1))
+    else if (!strcmp("9", input1))
     {
         // INSERT funcionality
         funcionality9(input2, input3);
     }
-    if (!strcmp("10", input1))
+    else if (!strcmp("10", input1))
+    {
+        //  INSERT funcionality
+        funcionality10(input2);
+    }
+    else if (!strcmp("11", input1))
     {
         // INSERT funcionality
-        // funcionality10(input2, input3);
+        funcionality11(input2, input3);
     }
-    if (!strcmp("11", input1))
-    {
-        // INSERT funcionality
-        // funcionality11(input2, input3);
-    }
-    if (!strcmp("12", input1))
+    else if (!strcmp("12", input1))
     {
         // INSERT funcionality
         // funcionality12(input2, input3);
     }
-    if (!strcmp("13", input1))
+    else if (!strcmp("13", input1))
     {
         // funcionality13(input2, input3);
     }
-    if (!strcmp("14", input1))
+    else if (!strcmp("14", input1))
     {
         // funcionality14(input2, input3);
     }

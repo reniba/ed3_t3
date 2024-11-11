@@ -63,6 +63,7 @@ void ReadInput(char string1[], char string2[], char string3[])
     if (!strcmp("11", string1))
     {
         scanf("%s", string2);
+        scanf("%s", string3);
     }
     if (!strcmp("12", string1))
     {
