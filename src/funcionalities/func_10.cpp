@@ -1,5 +1,4 @@
 #include "./../../headers/func_10.h"
-#include <algorithm>
 
 // INSERT funcionality
 int funcionality10(char DinosaurData_filename[])
@@ -42,6 +41,7 @@ int funcionality10(char DinosaurData_filename[])
     }
     sortGraph(&graph);
     printGraph(&graph);
+
     fclose(data_file);
 
     // printGrapgh

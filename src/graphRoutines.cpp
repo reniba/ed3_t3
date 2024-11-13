@@ -1,4 +1,5 @@
 #include "./../headers/graphRoutines.h"
+#include <bits/types/FILE.h>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -79,10 +80,9 @@ void increaseExitlevel(GRAPH *graph, std::string name)
 
 void addGraph(GRAPH *graph, Dinosaur temp_dino)
 {
+    // procura se o predador ja foi inserido
     bool found_predator = false;
-    bool found_prey = false;
     int found_pos_predator = -1;
-    int found_pos_prey = -1;
     for (int i = 0; i < graph->size(); i++)
     {
         if ((*graph)[i].first.name == temp_dino.name)
@@ -90,15 +90,8 @@ void addGraph(GRAPH *graph, Dinosaur temp_dino)
             found_predator = true;
             found_pos_predator = i;
         }
-        if ((*graph)[i].first.name == temp_dino.food)
-        {
-            found_prey = true;
-            found_pos_prey = i;
-        }
     }
-    // std::cout << temp_dino.name << std::endl;
-    // std::cout << temp_dino.food << std::endl;
-    // std::cout << found_predator << " " << found_prey << std::endl;
+    // se food é nulo, a presa nem o food entra na cadeia alimentar
     if (!strlen(temp_dino.food))
     {
         return;
@@ -108,6 +101,7 @@ void addGraph(GRAPH *graph, Dinosaur temp_dino)
         // precisa checar o se predator ja foi inicializado como prey
         if ((*graph)[found_pos_predator].second.empty())
         {
+            // predator achado não iniciado -> inicia ele
             ARRAY_NODE temp_node = createArrayNode(temp_dino);
 
             int temp1 = ((*graph)[found_pos_predator].first).entry_degree;
@@ -116,20 +110,22 @@ void addGraph(GRAPH *graph, Dinosaur temp_dino)
             (*graph)[found_pos_predator].first = temp_node;
             (*graph)[found_pos_predator].first.degree += temp2;
             (*graph)[found_pos_predator].first.entry_degree += temp1;
-            // increaseExitlevel(graph, temp_dino.name);
-            //             (*graph)[found_pos_predator].first = temp_node;
+            VECTOR_NODE temp_node2 = createVectorNode(temp_dino);
+
+            ((*graph)[found_pos_predator].second.push_back(temp_node2));
+            increaseExitlevel(graph, (*graph)[found_pos_predator].first.name);
         }
-
-        // dino que come está no grafo mas inicializado
-        VECTOR_NODE temp_node = createVectorNode(temp_dino);
-
-        ((*graph)[found_pos_predator].second.push_back(temp_node));
-        increaseExitlevel(graph, (*graph)[found_pos_predator].first.name);
+        else
+        {
+            // predador achado e já inicializado
+            VECTOR_NODE temp_node = createVectorNode(temp_dino);
+            ((*graph)[found_pos_predator].second.push_back(temp_node));
+            increaseExitlevel(graph, (*graph)[found_pos_predator].first.name);
+        }
     }
     else
     {
-        // precisa checar o se predator ja foi inicializado como prey
-        // dino que come está no grafo mas inicializado
+        // predador não foi achado
         VECTOR_NODE temp_node = createVectorNode(temp_dino);
         ARRAY_NODE temp_node2 = createArrayNode(temp_dino);
         std::vector<VECTOR_NODE> temp_vector;
@@ -138,20 +134,29 @@ void addGraph(GRAPH *graph, Dinosaur temp_dino)
 
         increaseExitlevel(graph, temp_node.name);
     }
+
+    // coloca presa
+    bool found_prey = false;
+    int found_pos_prey = -1;
+    for (int i = 0; i < graph->size(); i++)
+    {
+
+        if ((*graph)[i].first.name == temp_dino.food)
+        {
+            found_prey = true;
+            found_pos_prey = i;
+        }
+    }
     if (found_prey)
     {
-        // precisa checar o se predator ja foi inicializado como prey
+        // presa encontrada
         increaseEntrylevel(graph, (*graph)[found_pos_prey].first.name);
     }
     else
     {
-        // precisa checar o se predator ja foi inicializado como prey
+        // presa não encontrada
         ARRAY_NODE temp_node3 = createTEMParrayNode(temp_dino.food);
-        // VECTOR_NODE temp_node = createVectorNode(temp_dino);
-        ////ARRAY_NODE temp_node2 = createArrayNode(temp_dino);
         std::vector<VECTOR_NODE> temp_vector = {};
-        //(*graph)->second.push_back(temp_vector);
-        // graph->first.push_back(temp_node3);
         (*graph).push_back(std::make_pair(temp_node3, temp_vector));
 
         increaseEntrylevel(graph, temp_node3.name);
@@ -190,4 +195,44 @@ void printGraph(GRAPH *graph)
             printNode(graph, i, j);
         }
     }
+}
+
+void initializeGraph(GRAPH *graph, char Dinosaur_file[])
+{
+    FILE *data_file;
+    data_file = fopen(Dinosaur_file, "rb");
+    if (!data_file)
+    {
+        msg_default_error();
+        return;
+    }
+
+    // read the data file header information
+    Header head;
+    if (readHeader(&head, data_file) == 0) // empty file
+    {
+        msg_default_error();
+        return;
+    };
+    if (head.status == '0') // inconsistent file
+    {
+        msg_default_error();
+        return;
+    }
+
+    // initialize grapgh
+
+    // input amount of items to insert
+    for (int i = 1; i <= head.nextRRN; i++)
+    // for (int i = 1; i <= 1; i++)
+    {
+        // register input
+        Dinosaur temp_dino;
+        ReadFromFile(&temp_dino, data_file);
+        // if (temp_dino.population > -1)
+        addGraph(graph, temp_dino);
+        //  add grapgh
+    }
+    sortGraph(graph);
+    fclose(data_file);
 }

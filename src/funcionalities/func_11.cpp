@@ -1,5 +1,4 @@
 #include "./../../headers/func_11.h"
-#include <algorithm>
 
 // INSERT funcionality
 int funcionality11(char DinosaurData_filename[], char input[])

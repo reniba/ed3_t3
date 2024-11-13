@@ -1,4 +1,5 @@
 #include "./../headers/readInput.h"
+#include <string>
 
 /* ReadInput
  * Read more inputs depending on the command passed on string1
@@ -76,5 +77,6 @@ void ReadInput(char string1[], char string2[], char string3[])
     if (!strcmp("14", string1))
     {
         scanf("%s", string2);
+        scanf("%s", string3);
     }
 }

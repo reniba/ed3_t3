@@ -1,16 +1,18 @@
 #ifndef __GRAPH_ROUTINES__
 #define __GRAPH_ROUTINES__
 
+#include "messages.h"
 #include "speciesRoutines.h"
 //#include <bits/stdc++.h>
 #include <algorithm>
 #include <cstdlib>
+//#include <initializer_list>
 #include <iostream>
 #include <vector>
-
 //#include "bTreeHeaderRoutines.h"
 //#include "funcoes_fornecidas.h"
 #include "headerRoutines.h"
+#include "speciesRoutines.h"
 //#include <math.h>
 //#include <stdio.h>
 //#include <stdlib.h>
@@ -46,6 +48,7 @@ void addGraph(GRAPH *graph, Dinosaur temp_dino);
 void sortGraph(GRAPH *graph);
 void printNode(GRAPH *temp_graph, int i, int j);
 void printGraph(GRAPH *graph);
+void initializeGraph(GRAPH *graph, char Dinosaur_file[]);
 
 // int searchDinoIndexBtree(Dinosaur *Dino, bTree_Header *btree_head, FILE *bTreePointer);
 // int insertDinoIndexBtree(Dinosaur *Dino, FILE *bTreeFilename, bTree_Header *btree_head);

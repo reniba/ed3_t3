@@ -18,6 +18,9 @@
 #include "../headers/func_1.h"
 #include "../headers/func_10.h"
 #include "../headers/func_11.h"
+#include "../headers/func_12.h"
+#include "../headers/func_13.h"
+#include "../headers/func_14.h"
 #include "../headers/func_2.h"
 #include "../headers/func_3.h"
 #include "../headers/func_4.h"
@@ -26,9 +29,6 @@
 #include "../headers/func_7.h"
 #include "../headers/func_8.h"
 #include "../headers/func_9.h"
-//#include "../headers/func_12.h"
-//#include "../headers/func_13.h"
-//#include "../headers/func_14.h"
 #include "../headers/messages.h"
 #include "../headers/readInput.h"
 
@@ -103,15 +103,15 @@ int main()
     else if (!strcmp("12", input1))
     {
         // INSERT funcionality
-        // funcionality12(input2, input3);
+        funcionality12(input2, input3);
     }
     else if (!strcmp("13", input1))
     {
-        // funcionality13(input2, input3);
+        funcionality13(input2);
     }
     else if (!strcmp("14", input1))
     {
-        // funcionality14(input2, input3);
+        funcionality14(input2, input3);
     }
     else
     {
