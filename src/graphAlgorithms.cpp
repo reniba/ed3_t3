@@ -1,159 +1,129 @@
 #include "./../headers/graphAlgorithms.h"
-#include <climits>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <queue>
-#include <strings.h>
-#include <utility>
-#include <vector>
 
+/* creates a set data structure that indexes each name of a graph vertex to its corresponding
+ * position in the graph
+ *
+ * Example: index_table['aardonyx'] = 0, that is, the position of the vertex representing the
+ * dinosaur "aardonyx" is 0
+ *
+ * Helps implement other algorithms
+ */
 AUX_INDEX_MAP setIndexMap(GRAPH *graph)
 {
     AUX_INDEX_MAP temp_map;
     for (int i = 0; i < graph->size(); i++)
     {
-        // std::cout << (*graph)[i].first.name << " " << i << std::endl;
         temp_map.insert(std::make_pair((*graph)[i].first.name, i));
     }
     return temp_map;
 }
 
-int recursive_dfs(GRAPH *graph, AUX_INDEX_MAP *IndexMap, std::string node_name,
-                  std::vector<bool> &visited, std::string destino)
+/* DFS that returns 1 if there is a path of the "origin" node and that reaches the "destination"
+ * node returns 0 otherwise
+ */
+int recursive_dfs(GRAPH *graph, AUX_INDEX_MAP *index_map, std::vector<bool> &visited,
+                  std::string current_node_name, std::string destination_node_name)
 {
-    // std::cout << "Current Node: " << node_name << ' ' << (*IndexMap)[node_name] << std::endl;
-    if (node_name == destino)
+    // if the current node is the node beign searched for, return find
+    if (current_node_name == destination_node_name)
         return 1;
-    visited[(*IndexMap)[node_name]] = true;
-    for (VECTOR_NODE food_node : (*graph)[(*IndexMap)[node_name]].second)
+
+    int current_index = (*index_map)[current_node_name];
+    visited[current_index] = true; // mark the current node as visited
+
+    // for each adjacent node, visit it if it has not yet been visited
+    for (VECTOR_NODE food_node : (*graph)[current_index].second)
     {
-        if (visited[(*IndexMap)[food_node.food]] == false)
-            if (recursive_dfs(graph, IndexMap, food_node.food, visited, destino) == 1)
+        int destination_index = (*index_map)[food_node.food];
+        if (visited[destination_index] == false)
+            if (recursive_dfs(graph, index_map, visited, food_node.food, destination_node_name) ==
+                1)
                 return 1;
     }
     return 0;
 }
 
-int recursive_dfs2(GRAPH *graph, AUX_INDEX_MAP *IndexMap, std::string node_name,
-                   std::vector<bool> &visited, std::string destino)
-{
-    // std::cout << "Current Node: " << node_name << ' ' << (*IndexMap)[node_name] << std::endl;
-    if (node_name == destino)
-        return 1;
-    visited[(*IndexMap)[node_name]] = true;
-    for (VECTOR_NODE food_node : (*graph)[(*IndexMap)[node_name]].second)
-    {
-        if (visited[(*IndexMap)[food_node.food]] == false)
-            recursive_dfs(graph, IndexMap, food_node.food, visited, destino);
-    }
-    return 0;
-}
-
-/*void dfs(GRAPH *graph, AUX_INDEX_MAP *IndexMap)
-{
-    std::vector<bool> visited(IndexMap->size(), false);
-    recursive_dfs(graph, IndexMap, "achelousaurus", visited);
-}*/
-
-int dfs_number_of_cycles_rec(GRAPH *graph, AUX_INDEX_MAP *IndexMap, std::string node_name,
-                             std::vector<bool> &visited, std::set<std::string> *excluded,
-                             std::string origin_name, int *i)
-{
-    // std::cout << "Current Node: " << node_name << ' ' << (*IndexMap)[node_name] << std::endl;
-    // int resp = 0;
-    visited[(*IndexMap)[node_name]] = true;
-    // std::cout << (*graph)[3].first.name << std::endl;
-    // std::cout << (*graph)[3].second.size() << std::endl; // 0 ??
-    for (VECTOR_NODE food_node : (*graph)[(*IndexMap)[node_name]].second)
-    {
-        // std::cout << "olhando para a comida: " << food_node.food << " origem: " << origin_name
-        //           << std::endl;
-        if (food_node.food == origin_name)
-            i++;
-        // if (((*excluded).contains(food_node.food)) == false &&
-        if (visited[(*IndexMap)[food_node.food]] == false)
-            dfs_number_of_cycles_rec(graph, IndexMap, food_node.food, visited, excluded,
-                                     origin_name, i);
-    }
-    return 0;
-}
-
-int dfs_number_of_cycles(GRAPH *graph, AUX_INDEX_MAP *IndexMap)
-{
-    int resp = 0;
-    std::set<std::string> excluded = {};
-    for (int i = 0; i < graph->size(); i++)
-    {
-        std::vector<bool> visited(IndexMap->size(), false);
-        int resp_c = 0;
-        dfs_number_of_cycles_rec(graph, IndexMap, (*graph)[i].first.name, visited, &excluded,
-                                 (*graph)[i].first.name, &resp_c);
-        resp += resp_c;
-        excluded.insert((*graph)[i].first.name);
-    }
-    /*std::vector<bool> visited(IndexMap->size(), false);
-    std::cout << dfs_number_of_cycles_rec(graph, IndexMap, "abelisaurus", visited, &excluded,
-                                          "abelisaurus")
-              << std::endl;
-    excluded.insert((*graph)[0].first.name);*/
-
-    return resp;
-}
-
-void initializeTranposedGraph(GRAPH *graph, GRAPH *transposedGraph, AUX_INDEX_MAP *indexMap)
-{
-    for (int i = 0; i < graph->size(); i++)
-    {
-        (*transposedGraph).push_back((*graph)[i]);
-    }
-    for (int i = 0; i < graph->size(); i++)
-    {
-        for (int j = 0; j < (*graph)[i].second.size(); j++)
-        {
-            std::string food_name = (*graph)[i].second[j].food;
-            std::string hunter_name = (*graph)[i].second[j].name;
-            VECTOR_NODE temp_node;
-            temp_node.name = food_name;
-            temp_node.food = hunter_name;
-            int index = (*indexMap)[food_name];
-            (*transposedGraph)[index].second.push_back(temp_node);
-        }
-    }
-    sortGraph(transposedGraph);
-}
-
+/* Checks for a path that starts from the source node and arrives at the destination node
+ *
+ * works as an initializer for the "recursive_dfs" function
+ */
 int isPath(GRAPH *graph, AUX_INDEX_MAP *index_map, std::string src, std::string dest)
 {
     std::vector<bool> visited(index_map->size(), false);
-    return recursive_dfs(graph, index_map, src, visited, dest);
-}
-int isPath2(GRAPH *graph, AUX_INDEX_MAP *index_map, std::string src, std::string dest)
-{
-    std::vector<bool> visited(index_map->size(), false);
-    return recursive_dfs2(graph, index_map, src, visited, dest);
+    return recursive_dfs(graph, index_map, visited, src, dest);
 }
 
+/* DFS adapted to find the number of cycle components
+ *
+ * return the number of cycles that leave a vertex origin and arrive at itself
+ */
+int dfs_number_of_cycles_rec(GRAPH *graph, AUX_INDEX_MAP *index_map, std::vector<bool> &visited,
+                             std::string current_node_name, std::string origin_node_name, int *ans)
+{
+    // current node
+    int current_index = (*index_map)[current_node_name];
+    visited[current_index] = true; // marking current node as visited
+
+    for (VECTOR_NODE food_node : (*graph)[(*index_map)[current_node_name]].second)
+    {
+        // if the current node finds the origin_node, increment the answer
+        if (food_node.food == origin_node_name)
+            (*ans)++;
+
+        // visit other nodes
+        if (visited[(*index_map)[food_node.food]] == false)
+            dfs_number_of_cycles_rec(graph, index_map, visited, food_node.food, origin_node_name,
+                                     ans);
+    }
+    return 0;
+}
+
+/* Function that returns the number of cycles in the given directed graph
+ */
+int find_number_of_cycles(GRAPH *graph, AUX_INDEX_MAP *IndexMap)
+{
+    int cycles_num = 0;
+
+    // each iteration count the number of path that leave the origin and arrives at itself
+    for (int i = 0; i < graph->size(); i++)
+    {
+        std::vector<bool> visited(IndexMap->size(), false);
+        int aux_ans = 0;
+        aux_ans = dfs_number_of_cycles_rec(graph, IndexMap, visited, (*graph)[i].first.name,
+                                           (*graph)[i].first.name, &aux_ans);
+        cycles_num += aux_ans;
+    }
+
+    return cycles_num;
+}
+
+/* checks, by brute force, whether a graph is strongly connected or not
+ *
+ * for each combination of nodes in the graph, it checks to see if there is a path connecting both
+ * at the same time
+ */
 int isStronglyConnected(GRAPH *graph, AUX_INDEX_MAP *index_map)
 {
     bool isStrong = true;
+    // for each pair of nodes
     for (int i = 0; i < graph->size(); i++)
     {
         for (int j = 0; j < graph->size(); j++)
         {
-            if (!isPath(graph, index_map, (*graph)[i].first.name, (*graph)[j].first.name))
+            // check if there is a path
+            if (isPath(graph, index_map, (*graph)[i].first.name, (*graph)[j].first.name) == false)
                 isStrong = false;
         }
     }
     return isStrong;
 }
 
+// Calculate the number of strongly connected components
+//
+// brute force approach
 int StrongCompsGraph(GRAPH *graph, AUX_INDEX_MAP *index_map)
 {
-    GRAPH transposedGraph;
-    // initializeTranposedGraph(graph, &transposedGraph, index_map);
-    int ans = 0;
-
+    int ans2 = 0;
     std::vector<bool> is_ssc(graph->size(), false);
 
     for (int i = 0; i < graph->size(); i++)
@@ -162,25 +132,26 @@ int StrongCompsGraph(GRAPH *graph, AUX_INDEX_MAP *index_map)
         {
             std::vector<int> scc;
             scc.push_back(i);
-            for (int j = i; j < graph->size(); j++)
+            for (int j = 0; j < graph->size(); j++)
             {
+                // if there is a path from i to j and a path from j to i
                 if (!is_ssc[j] &&
-                    isPath2(graph, index_map, (*graph)[i].first.name, (*graph)[j].first.name))
+                    isPath(graph, index_map, (*graph)[i].first.name, (*graph)[j].first.name) &&
+                    isPath(graph, index_map, (*graph)[j].first.name, (*graph)[i].first.name))
                 {
                     is_ssc[j] = true;
                     scc.push_back(j);
                 }
             }
-            ans++;
+            ans2++;
         }
     }
-    return ans;
+    return ans2;
 }
 
+// retorna o index do vizinho com distância mínima
 int minDistance(GRAPH *graph, std::vector<int> dist, std::vector<bool> sptSet)
 {
-
-    // Initialize min value
     int min = INT_MAX, min_index;
 
     for (int v = 0; v < graph->size(); v++)
@@ -190,29 +161,51 @@ int minDistance(GRAPH *graph, std::vector<int> dist, std::vector<bool> sptSet)
     return min_index;
 }
 
+#define INF 1000000000
+// algoritmo de dijskstra
+// retorna o caminho com menor população entre o nó src e o nó dest
 int minPopulation(GRAPH *graph, std::string src, std::string dest, AUX_INDEX_MAP *index_map)
 {
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>,
                         std::greater<std::pair<int, int>>>
         pq;
-    std::vector<int> dist(graph->size(), INT32_MAX);
+    std::vector<int> dist(graph->size(), INF);
 
-    pq.push(std::make_pair(0, (*index_map)[src]));
-    dist[(*index_map)[src]] = 0;
+    int current_index = (*index_map)[src];
+    int destination_index = (*index_map)[dest];
+
+    pq.push(std::make_pair(0, current_index));
+    dist[current_index] = 0;
+
+    // modificação para englobar os casos onde uma presa come a si mesma
+    for (auto &neighbor : (*graph)[current_index].second)
+    {
+        if (neighbor.food == (*graph)[current_index].first.name)
+        {
+            dist[current_index] = neighbor.population;
+            break;
+        }
+    }
+    // se a presa não come a si mesma, a distância dela para si mesma é 0.
+    // embora conceitualmente errada, é necessária para o algoritmo funcionar e, além disso, o
+    //  campo não será importante
+
+    // algoritmo tradicional
     while (!pq.empty())
     {
-        int u = pq.top().second;
+        int u = pq.top().second; // index
         pq.pop();
         for (auto &neighbor : (*graph)[u].second)
         {
             std::string v = neighbor.food;
-            int weight = neighbor.population;
-            if (dist[(*index_map)[v]] > dist[u] + weight)
+            int neighbor_index = (*index_map)[v];
+            int neighbor_weight = neighbor.population;
+            if (dist[neighbor_index] > dist[u] + neighbor_weight)
             {
-                dist[(*index_map)[v]] = dist[u] + weight;
-                pq.push(std::make_pair(dist[(*index_map)[v]], (*index_map)[v]));
+                dist[neighbor_index] = dist[u] + neighbor_weight;
+                pq.push(std::make_pair(dist[neighbor_index], neighbor_index));
             }
         }
     }
-    return dist[(*index_map)[dest]];
+    return dist[destination_index];
 }

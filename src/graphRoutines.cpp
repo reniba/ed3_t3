@@ -1,15 +1,6 @@
 #include "./../headers/graphRoutines.h"
-#include <bits/types/FILE.h>
-#include <cmath>
-#include <functional>
-#include <iostream>
-#include <utility>
-#include <vector>
-//#include <cstdlib>
-//#include <cstring>
-//#include <string>
-//#include <vector>
 
+// comparator to determine a comparasion rule for the data_types created
 inline bool operator<(const ARRAY_NODE &a, const ARRAY_NODE &b)
 {
     return a.name < b.name;
@@ -25,6 +16,9 @@ inline bool operator<(const std::pair<ARRAY_NODE, std::vector<VECTOR_NODE>> &a,
     return a.first.name < b.first.name;
 }
 
+// create a temporary ARRAY_NODE given the prey name
+//
+// used when a prey is inserted, but not initialized as a hunter
 ARRAY_NODE createTEMParrayNode(std::string name)
 {
     ARRAY_NODE temp_node;
@@ -35,6 +29,9 @@ ARRAY_NODE createTEMParrayNode(std::string name)
     return temp_node;
 }
 
+// create a ARRAY_NODE given a struct Dinosaur given
+//
+// used when a hunter is inserted in the graph and was not initized yet
 ARRAY_NODE createArrayNode(Dinosaur temp_dino)
 {
     ARRAY_NODE temp_node;
@@ -46,6 +43,9 @@ ARRAY_NODE createArrayNode(Dinosaur temp_dino)
     temp_node.entry_degree = temp_node.exit_degree = temp_node.degree = 0;
     return temp_node;
 }
+// create a VECTOR_NODE
+//
+// used when a prey is inserted as a "food" from other hunter
 VECTOR_NODE createVectorNode(Dinosaur temp_dino)
 {
     VECTOR_NODE temp_node;
@@ -55,6 +55,8 @@ VECTOR_NODE createVectorNode(Dinosaur temp_dino)
     return temp_node;
 }
 
+// given a name of element from graph, increase degree and entry_degree at the node from the
+// correspondent name given
 void increaseEntrylevel(GRAPH *graph, std::string name)
 {
     for (int i = 0; i < graph->size(); i++)
@@ -66,6 +68,7 @@ void increaseEntrylevel(GRAPH *graph, std::string name)
         }
     }
 }
+// same as above, but exit degre and degree
 void increaseExitlevel(GRAPH *graph, std::string name)
 {
     for (int i = 0; i < graph->size(); i++)
@@ -78,6 +81,7 @@ void increaseExitlevel(GRAPH *graph, std::string name)
     }
 }
 
+// insert a register on the graph
 void addGraph(GRAPH *graph, Dinosaur temp_dino)
 {
     // procura se o predador ja foi inserido
