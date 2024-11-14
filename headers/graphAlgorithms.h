@@ -15,4 +15,6 @@ int StrongCompsGraph(GRAPH *graph, AUX_INDEX_MAP *index_map);
 int isStronglyConnected(GRAPH *graph, AUX_INDEX_MAP *index_map);
 int minPopulation(GRAPH *graph, std::string src, std::string dest, AUX_INDEX_MAP *index_map);
 int isPath(GRAPH *graph, AUX_INDEX_MAP *index_map, std::string src, std::string dest);
+bool kosaraju(GRAPH *graph, AUX_INDEX_MAP *index_map);
+int kosaraju_number(GRAPH *graph, AUX_INDEX_MAP *index_map);
 #endif
