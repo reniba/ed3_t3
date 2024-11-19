@@ -27,7 +27,7 @@ void initializeTranposedGraph(GRAPH *graph, GRAPH *transposedGraph, AUX_INDEX_MA
     // Initialize all nodes in transposed graph
     for (int i = 0; i < graph->size(); i++)
     {
-        std::vector<VECTOR_NODE> temp = {};
+        std::vector<FOOD_NODE> temp = {};
         (*transposedGraph).push_back(make_pair((*graph)[i].first, temp));
     }
     // add each hunter to the correct prey
@@ -36,9 +36,8 @@ void initializeTranposedGraph(GRAPH *graph, GRAPH *transposedGraph, AUX_INDEX_MA
         for (int j = 0; j < (*graph)[i].second.size(); j++)
         {
             std::string food_name = (*graph)[i].second[j].food;
-            std::string hunter_name = (*graph)[i].second[j].name;
-            VECTOR_NODE temp_node;
-            temp_node.name = food_name;
+            std::string hunter_name = (*graph)[i].first.name;
+            FOOD_NODE temp_node;
             temp_node.food = hunter_name;
             int index = (*index_map)[food_name];
             (*transposedGraph)[index].second.push_back(temp_node);
@@ -63,7 +62,7 @@ int recursive_dfs(GRAPH *graph, AUX_INDEX_MAP *index_map, std::vector<bool> *vis
     (*visited)[current_index] = true; // mark the current node as visited
 
     // visit each adjacent node if it has not been visited
-    for (VECTOR_NODE food_node : (*graph)[current_index].second)
+    for (FOOD_NODE food_node : (*graph)[current_index].second)
     {
         int destination_index = (*index_map)[food_node.food];
         if ((*visited)[destination_index] == false)
@@ -79,10 +78,11 @@ int recursive_dfs(GRAPH *graph, AUX_INDEX_MAP *index_map, std::vector<bool> *vis
  *
  * Initializes the "recursive_dfs" function to perform the path search.
  */
-int isPath(GRAPH *graph, AUX_INDEX_MAP *index_map, std::string src, std::string dest)
+int isPath(GRAPH *graph, std::string src, std::string dest)
 {
-    std::vector<bool> visited(index_map->size(), false);
-    return recursive_dfs(graph, index_map, &visited, src, dest);
+    AUX_INDEX_MAP index_map = setIndexMap(graph);
+    std::vector<bool> visited(index_map.size(), false);
+    return recursive_dfs(graph, &index_map, &visited, src, dest);
 }
 
 /* DFS adapted to find the number of cycle components
@@ -95,7 +95,7 @@ int dfs_number_of_cycles_rec(GRAPH *graph, AUX_INDEX_MAP *index_map, std::vector
     int current_index = (*index_map)[current_node_name];
     (*visited)[current_index] = true; // marking current node as visited
 
-    for (VECTOR_NODE food_node : (*graph)[(*index_map)[current_node_name]].second)
+    for (FOOD_NODE food_node : (*graph)[(*index_map)[current_node_name]].second)
     {
         // if the current node finds the origin_node, increment the answer
         if (food_node.food == origin_node_name)
@@ -112,16 +112,17 @@ int dfs_number_of_cycles_rec(GRAPH *graph, AUX_INDEX_MAP *index_map, std::vector
 /*
  * Returns the number of cycles in the given directed graph
  */
-int find_number_of_cycles(GRAPH *graph, AUX_INDEX_MAP *IndexMap)
+int find_number_of_cycles(GRAPH *graph)
 {
+    AUX_INDEX_MAP index_map = setIndexMap(graph);
     int cycles_num = 0;
 
     // each iteration count the number of path that leave the origin and arrives at itself
     for (int i = 0; i < graph->size(); i++)
     {
-        std::vector<bool> visited(IndexMap->size(), false);
+        std::vector<bool> visited(index_map.size(), false);
         int aux_ans = 0;
-        dfs_number_of_cycles_rec(graph, IndexMap, &visited, (*graph)[i].first.name,
+        dfs_number_of_cycles_rec(graph, &index_map, &visited, (*graph)[i].first.name,
                                  (*graph)[i].first.name, &aux_ans);
         cycles_num += aux_ans;
     }
@@ -148,14 +149,16 @@ void DFS_util(GRAPH *graph, std::vector<bool> *visited, AUX_INDEX_MAP *index_map
  * Checks if a graph is strongly connected using a variation of Kosaraju's algorithm.
 
  */
-bool kosaraju(GRAPH *graph, AUX_INDEX_MAP *index_map)
+bool kosaraju(GRAPH *graph)
 {
+    AUX_INDEX_MAP index_map = setIndexMap(graph);
+
     GRAPH transposedGraph;
-    initializeTranposedGraph(graph, &transposedGraph, index_map);
+    initializeTranposedGraph(graph, &transposedGraph, &index_map);
     AUX_INDEX_MAP new_index_map = setIndexMap(&transposedGraph);
 
     std::vector<bool> visited(graph->size(), false);
-    DFS_util(graph, &visited, index_map, (*graph)[0].first.name);
+    DFS_util(graph, &visited, &index_map, (*graph)[0].first.name);
     for (int i = 0; i < (*graph).size(); i++)
         if (visited[i] == false)
             return false;
@@ -193,31 +196,38 @@ void fillOrder(GRAPH *graph, AUX_INDEX_MAP *index_map, std::string current_node,
 /*
  * Calculate the number of strongly connected components using kosaraju's algorithm
  */
-int kosaraju_number(GRAPH *graph, AUX_INDEX_MAP *index_map)
+int kosaraju_number(GRAPH *graph)
 {
+    // setting the auxiliar structure index map
+    AUX_INDEX_MAP index_map = setIndexMap(graph);
+
     int ans = 0;
     std::stack<int> Stack;
     std::vector<bool> visited(graph->size(), false);
-    // fill vertives
+
+    // first step
+    // fill vertices according to finishing time
     for (int i = 0; i < graph->size(); i++)
     {
         if (visited[i] == false)
-            fillOrder(graph, index_map, (*graph)[i].first.name, &visited, &Stack);
+            fillOrder(graph, &index_map, (*graph)[i].first.name, &visited, &Stack);
     }
 
+    // second step
+    // DFS on transposed graph, considering decreasing order of their finish times
     GRAPH transposedGraph;
-    initializeTranposedGraph(graph, &transposedGraph, index_map);
+    initializeTranposedGraph(graph, &transposedGraph, &index_map);
     AUX_INDEX_MAP new_index_map = setIndexMap(&transposedGraph);
     for (int i = 0; i < (*graph).size(); i++)
     {
         visited[i] = false;
     }
-    while (Stack.empty() == false)
+    while (Stack.empty() == false) // while there is node
     {
-        int v = Stack.top();
+        int v = Stack.top(); // process the node
         Stack.pop();
 
-        if (visited[v] == false)
+        if (visited[v] == false) // compute its SCC
         {
             DFS_util(&transposedGraph, &visited, &new_index_map, (transposedGraph)[v].first.name);
             ans++;
@@ -244,15 +254,16 @@ int minDistance(GRAPH *graph, std::vector<int> dist, std::vector<bool> sptSet)
  * Dijkstra's algorithm that returns the path with the minimum population
  * between the source node "src" and destination node "dest".
  */
-int minPopulation(GRAPH *graph, std::string src, std::string dest, AUX_INDEX_MAP *index_map)
+int minPopulation(GRAPH *graph, std::string src, std::string dest)
 {
+    AUX_INDEX_MAP index_map = setIndexMap(graph);
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>,
                         std::greater<std::pair<int, int>>>
         pq;
     std::vector<int> dist(graph->size(), INF);
 
-    int current_index = (*index_map)[src];
-    int destination_index = (*index_map)[dest];
+    int current_index = (index_map)[src];
+    int destination_index = (index_map)[dest];
 
     pq.push(std::make_pair(0, current_index));
     dist[current_index] = 0;
@@ -275,7 +286,7 @@ int minPopulation(GRAPH *graph, std::string src, std::string dest, AUX_INDEX_MAP
         for (auto &neighbor : (*graph)[u].second)
         {
             std::string v = neighbor.food;
-            int neighbor_index = (*index_map)[v];
+            int neighbor_index = (index_map)[v];
             int neighbor_weight = neighbor.population;
             if (dist[neighbor_index] > dist[u] + neighbor_weight)
             {

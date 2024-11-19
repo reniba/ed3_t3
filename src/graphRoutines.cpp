@@ -1,27 +1,27 @@
 #include "./../headers/graphRoutines.h"
 
 // comparator to determine a comparasion rule for the data types created
-inline bool operator<(const ARRAY_NODE &a, const ARRAY_NODE &b)
+inline bool operator<(const NAME_NODE &a, const NAME_NODE &b)
 {
     return a.name < b.name;
 }
 
-inline bool operator<(const VECTOR_NODE &a, const VECTOR_NODE &b)
+inline bool operator<(const FOOD_NODE &a, const FOOD_NODE &b)
 {
     return a.food < b.food;
 }
-inline bool operator<(const std::pair<ARRAY_NODE, std::vector<VECTOR_NODE>> &a,
-                      const std::pair<ARRAY_NODE, std::vector<VECTOR_NODE>> &b)
+inline bool operator<(const std::pair<NAME_NODE, std::vector<FOOD_NODE>> &a,
+                      const std::pair<NAME_NODE, std::vector<FOOD_NODE>> &b)
 {
     return a.first.name < b.first.name;
 }
 
-// create a temporary ARRAY_NODE given the prey name
+// create a temporary NAME_NODE given the prey name
 //
 // used when a prey is inserted, but not initialized as a hunter
-ARRAY_NODE createTEMParrayNode(std::string name)
+NAME_NODE createTemporaryNameNode(std::string name)
 {
-    ARRAY_NODE temp_node;
+    NAME_NODE temp_node;
     temp_node.name = name;
     temp_node.degree = 0;
     temp_node.entry_degree = 0;
@@ -29,12 +29,12 @@ ARRAY_NODE createTEMParrayNode(std::string name)
     return temp_node;
 }
 
-// create a ARRAY_NODE given a struct Dinosaur given
+// create a NAME_NODE given a struct Dinosaur given
 //
 // used when a hunter is inserted in the graph and was not initized yet
-ARRAY_NODE createArrayNode(Dinosaur temp_dino)
+NAME_NODE createNameNode(Dinosaur temp_dino)
 {
-    ARRAY_NODE temp_node;
+    NAME_NODE temp_node;
     temp_node.name = temp_dino.name;
     temp_node.species = temp_dino.specie_name;
     temp_node.habitat = temp_dino.habitat;
@@ -43,15 +43,14 @@ ARRAY_NODE createArrayNode(Dinosaur temp_dino)
     temp_node.entry_degree = temp_node.exit_degree = temp_node.degree = 0;
     return temp_node;
 }
-// create a VECTOR_NODE
+// create a FOOD_NODE
 //
 // used when a prey is inserted as a "food" from other hunter
-VECTOR_NODE createVectorNode(Dinosaur temp_dino)
+FOOD_NODE createFoodNode(Dinosaur temp_dino)
 {
-    VECTOR_NODE temp_node;
+    FOOD_NODE temp_node;
     temp_node.food = temp_dino.food;
     temp_node.population = temp_dino.population;
-    temp_node.name = temp_dino.name;
     return temp_node;
 }
 
@@ -84,103 +83,129 @@ void increaseExitlevel(GRAPH *graph, std::string name)
 // inserts a new record into the graph
 void addGraph(GRAPH *graph, Dinosaur temp_dino)
 {
+    // if food is null, the prey and hunter are not part of the food chain
+    if (!strlen(temp_dino.food))
+    {
+        return;
+    }
+
     // search to check if the predator already exists in the graph
     bool found_predator = false;
-    int found_pos_predator = -1;
+    int predator_position = -1;
     for (int i = 0; i < graph->size(); i++)
     {
         if ((*graph)[i].first.name == temp_dino.name)
         {
             found_predator = true;
-            found_pos_predator = i;
+            predator_position = i;
         }
     }
-    // se food is null, the prey and hunter are not part of the food chain
-    if (!strlen(temp_dino.food))
-    {
-        return;
-    }
+
     if (found_predator)
     {
         // check if the predator has been initialized as prey
-        if ((*graph)[found_pos_predator].second.empty())
+        if ((*graph)[predator_position].second.empty())
         {
             // predator found but not initialized - initialize it
-            ARRAY_NODE temp_node = createArrayNode(temp_dino);
 
-            int temp1 = ((*graph)[found_pos_predator].first).entry_degree;
-            int temp2 = ((*graph)[found_pos_predator].first).degree;
+            NAME_NODE temp_name_node = createNameNode(temp_dino);
 
-            (*graph)[found_pos_predator].first = temp_node;
-            (*graph)[found_pos_predator].first.degree += temp2;
-            (*graph)[found_pos_predator].first.entry_degree += temp1;
-            VECTOR_NODE temp_node2 = createVectorNode(temp_dino);
+            // saving the degree of past insertions
+            int temp_degree1 = ((*graph)[predator_position].first).degree;
+            int temp_degree2 = ((*graph)[predator_position].first).entry_degree;
 
-            ((*graph)[found_pos_predator].second.push_back(temp_node2));
-            increaseExitlevel(graph, (*graph)[found_pos_predator].first.name);
+            // setting NAME_NODE
+            (*graph)[predator_position].first = temp_name_node;
+            (*graph)[predator_position].first.degree += temp_degree1;
+            (*graph)[predator_position].first.entry_degree += temp_degree2;
+            increaseExitlevel(graph, (*graph)[predator_position].first.name);
+
+            // setting VECTOR_NODE
+            FOOD_NODE temp_food_node = createFoodNode(temp_dino);
+            ((*graph)[predator_position].second.push_back(temp_food_node));
         }
         else
         {
             // predator found and already initialized
-            VECTOR_NODE temp_node = createVectorNode(temp_dino);
-            ((*graph)[found_pos_predator].second.push_back(temp_node));
-            increaseExitlevel(graph, (*graph)[found_pos_predator].first.name);
+
+            // setting NAME_NODE
+            increaseExitlevel(graph, (*graph)[predator_position].first.name);
+
+            // setting FOOD_NODE
+            FOOD_NODE temp_food_node = createFoodNode(temp_dino);
+            ((*graph)[predator_position].second.push_back(temp_food_node));
         }
     }
     else
     {
         // predator not found - add as a new node
-        VECTOR_NODE temp_node = createVectorNode(temp_dino);
-        ARRAY_NODE temp_node2 = createArrayNode(temp_dino);
-        std::vector<VECTOR_NODE> temp_vector;
-        temp_vector.push_back(temp_node);
-        (*graph).push_back(std::make_pair(temp_node2, temp_vector));
 
-        increaseExitlevel(graph, temp_node.name);
+        // setting NAME_NODE
+        NAME_NODE temp_name_node = createNameNode(temp_dino);
+
+        // setting FOOD_NODE
+        FOOD_NODE temp_food_node = createFoodNode(temp_dino);
+        std::vector<FOOD_NODE> temp_vector;
+        temp_vector.push_back(temp_food_node);
+        (*graph).push_back(std::make_pair(temp_name_node, temp_vector));
+
+        // increasing NAME_NODE
+        increaseExitlevel(graph, temp_name_node.name);
     }
 
-    // add pay to the graph
+    // adding prey to the graph
+    // finding location of the food/prey
     bool found_prey = false;
-    int found_pos_prey = -1;
+    int prey_position = -1;
     for (int i = 0; i < graph->size(); i++)
     {
-
         if ((*graph)[i].first.name == temp_dino.food)
         {
             found_prey = true;
-            found_pos_prey = i;
+            prey_position = i;
         }
     }
+
     if (found_prey)
     {
         // prey found
-        increaseEntrylevel(graph, (*graph)[found_pos_prey].first.name);
+        // setting NAME_NODE
+        increaseEntrylevel(graph, (*graph)[prey_position].first.name);
     }
     else
     {
         // prey not found - add as a new node
-        ARRAY_NODE temp_node3 = createTEMParrayNode(temp_dino.food);
-        std::vector<VECTOR_NODE> temp_vector = {};
-        (*graph).push_back(std::make_pair(temp_node3, temp_vector));
+        // setting NAME_NODE
+        NAME_NODE temp_name_node = createTemporaryNameNode(temp_dino.food);
 
-        increaseEntrylevel(graph, temp_node3.name);
+        // setting FOOD_NODE
+        std::vector<FOOD_NODE> temp_vector = {};
+        (*graph).push_back(std::make_pair(temp_name_node, temp_vector));
+
+        // setting NAME_NODE
+        increaseEntrylevel(graph, temp_name_node.name);
     }
 }
 
-// sort the graph nodes and their internal vectors
+/*
+ * sorts the graph and its internal adjacent lists according to, respectively, the name representing
+ the node and the food representing the node
+ */
 void sortGraph(GRAPH *graph)
 {
     // sort each inner vector in the graph
     for (int i = 0; i < graph->size(); i++)
     {
-        if (!(*graph)[i].second.empty())
+        if (!(*graph)[i].second.empty()) // if not empty
             sort((*graph)[i].second.begin(), (*graph)[i].second.end());
     }
     // sort the main graph vector
     sort((*graph).begin(), (*graph).end());
 }
 
-// prints a single node and its data
+/*
+ * shows the node of position i, j.
+ */
 void printNode(GRAPH *temp_graph, int i, int j)
 {
     printf("%s %s %s %s %s %d %d %d %s %d\n", (*temp_graph)[i].first.name.c_str(),
@@ -191,7 +216,9 @@ void printNode(GRAPH *temp_graph, int i, int j)
            (*temp_graph)[i].second[j].population);
 }
 
-// prints the entire graph.
+/*
+ * shows the entire graph.
+ */
 void printGraph(GRAPH *graph)
 {
     for (int i = 0; i < (*graph).size(); i++)
@@ -202,8 +229,9 @@ void printGraph(GRAPH *graph)
         }
     }
 }
-
-// initializes the graph from a binary file containing dinosaur data.
+/*
+ * initializes a graph from a binary file containing information about dinosaurs
+ */
 void initializeGraph(GRAPH *graph, char Dinosaur_file[])
 {
     FILE *data_file;
@@ -227,13 +255,14 @@ void initializeGraph(GRAPH *graph, char Dinosaur_file[])
         return;
     }
 
-    // initialize the graph bases on the files's content.
+    // insert each register into graph
     for (int i = 1; i <= head.nextRRN; i++)
     {
         Dinosaur temp_dino;
         ReadFromFile(&temp_dino, data_file);
         addGraph(graph, temp_dino);
     }
+
     // sort the graph after all nodes are added.
     sortGraph(graph);
     fclose(data_file);

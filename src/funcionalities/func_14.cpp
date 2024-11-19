@@ -5,7 +5,6 @@ int funcionality14(char DinosaurData_filename[], char input[])
     // initialize GRAPH
     GRAPH graph;
     initializeGraph(&graph, DinosaurData_filename);
-    AUX_INDEX_MAP IndexMap = setIndexMap(&graph);
 
     // for each input
     for (int i = 0; i < atoi(input); i++)
@@ -18,11 +17,11 @@ int funcionality14(char DinosaurData_filename[], char input[])
         std::string dest = field2;
 
         // search for a path beetween the input names
-        bool ispath = isPath(&graph, &IndexMap, src, dest);
+        bool ispath = isPath(&graph, src, dest);
 
         // output
         std::cout << src << " " << dest << ": "
-                  << (ispath ? std::to_string((minPopulation(&graph, src, dest, &IndexMap)))
+                  << (ispath ? std::to_string((minPopulation(&graph, src, dest)))
                              : "CAMINHO INEXISTENTE")
                   << std::endl;
     }
